@@ -3,40 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Nhấp Chuột Nhanh</title>
+    <title>Neon Quest: Creative Runner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            background: #1a1a2e; 
-            color: #fff; 
-            padding-top: 80px; 
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap');
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #090a0f;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
         }
-        button { 
-            font-size: 22px; 
-            padding: 15px 35px; 
-            background: #e94560; 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            margin-top: 20px; 
-            transition: 0.2s;
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
         }
-        button:hover { background: #ff6b81; transform: scale(1.05); }
-        .score-box { font-size: 28px; color: #4ecca3; margin: 20px; }
+        .neon-box {
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+            border: 1px solid rgba(0, 243, 255, 0.6);
+        }
+        .neon-text {
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.8);
+        }
+        .neon-pink-text {
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.8);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f3ff;
+            border-radius: 3px;
+        }
     </style>
 </head>
-<body>
-    <h1>🎮 GAME BẤM NÚT TÍNH ĐIỂM</h1>
-    <div class="score-box">Điểm số: <span id="score">0</span></div>
-    <button onclick="tangDiem()">BẤM VÀO ĐÂY ĐỂ CHƠI!</button>
+<body class="h-screen w-screen flex flex-col justify-between items-center bg-slate-950 relative overflow-hidden">
 
-    <script>
-        let diem = 0;
-        function tangDiem() {
-            diem++;
-            document.getElementById('score').innerText = diem;
+    <!-- Ambient Glow Effects -->
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-pink-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Top Bar: Resources & Info -->
+    <header class="w-full max-w-4xl px-4 py-3 flex justify-between items-center z-10 border-b border-slate-800 bg-slate-900/60 backdrop-blur-md">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid font-orbitron text-2xl text-cyan-400 fa-gamepad"></i>
+            <h1 class="text-xl font-bold font-orbitron tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">NEON RUNNER</h1>
+        </div>
+        
+        <div class="flex items-center space-x-6 font-orbitron">
+            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-yellow-500/30">
+                <i class="fa-solid fa-gem text-yellow-400"></i>
+                <span id="gemCount" class="text-yellow-400 font-bold">100</span>
+            </div>
+            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-cyan-500/30">
+                <i class="fa-solid fa-trophy text-cyan-400"></i>
+                <span id="highScoreText" class="text-cyan-400 font-bold">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Canvas Container -->
+    <main class="relative w-full max-w-4xl flex-1 flex items-center justify-center p-2 z-10">
+        <canvas id="gameCanvas" width="800" height="500" class="w-full h-auto max-h-[75vh] object-contain rounded-xl border border-cyan-500/30 shadow-[0_0_30px_rgba(0,243,255,0.15)] bg-slate-900/90"></canvas>
+        
+        <!-- START / OVERLAY SCREEN -->
+        <div id="uiOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm rounded-xl p-4 transition-all duration-300">
+            <h2 id="overlayTitle" class="text-4xl md:text-5xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 mb-2 text-center">THỬ THÁCH VÔ CỰC</h2>
+            <p id="overlaySubtitle" class="text-slate-400 text-sm md:text-base mb-6 text-center max-w-md">Sáng tạo nhân vật, né tránh vật cản và tích lũy phần thưởng!</p>
+            
+            <button id="btnPlay" class="group relative px-8 py-3 font-orbitron text-lg font-bold text-slate-950 bg-cyan-400 rounded-lg shadow-[0_0_20px_rgba(0,243,255,0.6)] hover:bg-cyan-300 hover:shadow-[0_0_30px_rgba(0,243,255,0.9)] transition-all transform hover:scale-105 active:scale-95 mb-4">
+                <i class="fa-solid fa-play mr-2"></i> BẮT ĐẦU CHƠI
+            </button>
+
+            <!-- Quick Instructions -->
+            <div class="flex gap-4 text-xs text-slate-400 bg-slate-900/80 px-4 py-2 rounded-lg border border-slate-800">
+                <span><kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-cyan-400">A</kbd>/<kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-cyan-400">D</kbd> hoặc <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-cyan-400">←</kbd><kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-cyan-400">→</kbd> Trái / Phải</span>
+                <span><kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-pink-400">SPACE</kbd> Lướt (Dash)</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation Tabs (Features) -->
+    <footer class="w-full max-w-4xl px-4 py-3 mb-2 z-10">
+        <div class="grid grid-cols-4 gap-2 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-xl border border-slate-800">
+            <button id="tabCustom" class="tab-btn flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 px-3 rounded-lg bg-slate-800 text-cyan-400 border border-cyan-500/30 transition-all">
+                <i class="fa-solid fa-paint-brush"></i>
+                <span class="text-xs md:text-sm font-bold">1. Sáng Tạo</span>
+            </button>
+            <button id="tabWheel" class="tab-btn flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 px-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-yellow-400 transition-all">
+                <i class="fa-solid fa-arrows-spin"></i>
+                <span class="text-xs md:text-sm font-bold">2. Phần Thưởng</span>
+            </button>
+            <button id="tabSocial" class="tab-btn flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 px-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-pink-400 transition-all">
+                <i class="fa-solid fa-users"></i>
+                <span class="text-xs md:text-sm font-bold">3. Tương Tác</span>
+            </button>
+            <button id="tabChallenge" class="tab-btn flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-2 px-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-purple-400 transition-all">
+                <i class="fa-solid fa-fire"></i>
+                <span class="text-xs md:text-sm font-bold">4. Thử Thách</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: SÁNG TẠO (CUSTOMIZATION) -->
+    <div id="modalCustom" class="modal hidden absolute inset-0 z-20 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+        <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl p-6 w-full max-w-lg shadow-[0_0_30px_rgba(0,243,255,0.2)]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold font-orbitron text-cyan-400 flex items-center gap-2">
+                    <i class="fa-solid fa-palette"></i> TÙY BIẾN NHÂN VẬT
+                </h3>
+                <button class="close-modal text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <!-- Shape Selection -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">1. Hình Dáng Nhân Vật</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button data-shape="square" class="shape-btn py-2 bg-slate-800 border border-cyan-500/50 rounded-lg text-sm font-bold text-cyan-300 hover:bg-slate-700">Khối Vuông</button>
+                    <button data-shape="circle" class="shape-btn py-2 bg-slate-800 border border-slate-70
         }
     </script>
 </body>
