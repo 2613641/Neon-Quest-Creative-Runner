@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Nhấp Chuột Nhanh</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background: #1a1a2e; 
+            color: #fff; 
+            padding-top: 80px; 
+        }
+        button { 
+            font-size: 22px; 
+            padding: 15px 35px; 
+            background: #e94560; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            transition: 0.2s;
+        }
+        button:hover { background: #ff6b81; transform: scale(1.05); }
+        .score-box { font-size: 28px; color: #4ecca3; margin: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🎮 GAME BẤM NÚT TÍNH ĐIỂM</h1>
+    <div class="score-box">Điểm số: <span id="score">0</span></div>
+    <button onclick="tangDiem()">BẤM VÀO ĐÂY ĐỂ CHƠI!</button>
+
+    <script>
+        let diem = 0;
+        function tangDiem() {
+            diem++;
+            document.getElementById('score').innerText = diem;
+        }
+    </script>
+</body>
+</html>
